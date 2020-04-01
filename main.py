@@ -1,26 +1,39 @@
 import random
+from math import *
 
 CITY_SIZE = 10000
-POPULATION = 10000
-TRACK_LENGTH = 1
+POPULATION_PARAMETRS = {
+    "Type" : "Random",
+    "Size" : 10000
+}
+TRACK_LENGTH = 24
 
 class Person(object):
-    # Надо добавить варианты Random, Average, Exect(с приложенным словарем парметров)
     """
+    Надо добавить варианты Random, Average, Exect(с приложенным словарем парметров)
+    Random -- случайный человек
+    Average -- нормальный человек (нормальный в статистическом понимании)
+    Exact -- человек с четкозаднными парметрами
     Person parametrs:
         age -- возраст
+        imunity -- мощь имунитета
         disease -- наличие болезней повышающих шансы умереть
         sex -- пол
         nationality -- национальность (может влиять на вероятность заболеть)
         elitism ("poor" : 1, "av" : 2, "rich" : 3) -- эллитарность? влияет на возможности по лечению болезни и другие параметры связанные с доходом
+        work_point -- место в городе где человек работает
+        home_point -- место дома
     """
-    def __init__(self,p_id,person_type = "Random"):
+    def __init__(self,p_id,person_type = "Random",parametrs = None):
         if person_type == "Random":
             self.age = random.randint(1,128)
             self.sex = random.randint(0,1)
             self.disease = random.randint(0,1)
             self.nationality = None
             self.elitism = random.randint(1,3)
+            self.imunity = random.uniform(0,1)
+            self.home_point = random.randint(0,CITY_SIZE-1)
+            self.work_point = random.randint(0,CITY_SIZE-1)
 
         self.contagiousness = 0
         self.id = p_id
@@ -30,17 +43,20 @@ class Person(object):
 
     def update(self,dose):
         if dose > 0:
-            if random.uniform(0,1) >= 1/((dose**0.5)*1.2):
+            if random.uniform(0,1) >= 1-atan(dose/16)/pi:
                 self.contagiousness = 1
         
 
-
-def create_average_population():
-    pass
+#Add other types of population !!!
+def create_population(population_parametrs):
+    if population_parametrs["Type"] == "Random":
+        population = [Person(i) for i in range(population_parametrs["Size"])]
+    else:
+        pass
     return population
 
 
-#переделать, все болеют это не дело
+#переделать, все болеют, а это не дело
 def epidemic_end(people):
     for person in people:
         if person.contagiousness == 0:
@@ -50,17 +66,24 @@ def epidemic_end(people):
 
 
 def main():
+
     """
     Стартовые процедуры
     """
-    id_people = {}
-    for i in range(POPULATION):
-        id_people[i] = Person(i)
-    id_people[random.randint(0,POPULATION-1)].contagiousness = 1
-    people = id_people.values()
+
+    people = create_population(POPULATION_PARAMETRS)
+    id_people = dict([(person.id,person) for person in people]) 
+
+    #создание нулевого пациента
+    people[random.randint(0,POPULATION_PARAMETRS["Size"]-1)].contagiousness = 1
+
+
+
+
     """
     Основой цикл
     """
+    day = 0
     while not epidemic_end(people):
         id_track = {}
         for person in people:         
@@ -78,7 +101,8 @@ def main():
         for person in people:
             if person.contagiousness > 0:
                 ill += 1
-        print("All: {0}, Infected: {1}, Healthy: {2}".format(POPULATION, ill, POPULATION - ill))
+        day += 1
+        print("Day: {0}, All: {1}, Infected: {2}, Healthy: {3}".format(day,POPULATION_PARAMETRS["Size"], ill, POPULATION_PARAMETRS["Size"] - ill))
 
 
 
