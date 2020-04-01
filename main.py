@@ -5,7 +5,23 @@ POPULATION = 10000
 TRACK_LENGTH = 1
 
 class Person(object):
-    def __init__(self,p_id):
+    # Надо добавить варианты Random, Average, Exect(с приложенным словарем парметров)
+    """
+    Person parametrs:
+        age -- возраст
+        disease -- наличие болезней повышающих шансы умереть
+        sex -- пол
+        nationality -- национальность (может влиять на вероятность заболеть)
+        elitism ("poor" : 1, "av" : 2, "rich" : 3) -- эллитарность? влияет на возможности по лечению болезни и другие параметры связанные с доходом
+    """
+    def __init__(self,p_id,person_type = "Random"):
+        if person_type == "Random":
+            self.age = random.randint(1,128)
+            self.sex = random.randint(0,1)
+            self.disease = random.randint(0,1)
+            self.nationality = None
+            self.elitism = random.randint(1,3)
+
         self.contagiousness = 0
         self.id = p_id
 
@@ -16,15 +32,23 @@ class Person(object):
         if dose > 0:
             if random.uniform(0,1) >= 1/((dose**0.5)*1.2):
                 self.contagiousness = 1
-            
+        
 
 
+def create_average_population():
+    pass
+    return population
+
+
+#переделать, все болеют это не дело
 def epidemic_end(people):
     for person in people:
         if person.contagiousness == 0:
             return False
     return True
     
+
+
 def main():
     """
     Стартовые процедуры
